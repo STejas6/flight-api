@@ -1,0 +1,307 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Passenger Information API",
+    "description": "API for querying passenger data with categorization and priority ordering. Designed for watsonx Orchestrate agents to retrieve passenger information for flight disruption management.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5001",
+      "description": "Local Development Server (update to Render URL after deployment)"
+    }
+  ],
+  "paths": {
+    "/passengers/flight/{flight_no}": {
+      "get": {
+        "summary": "Get Passengers by Flight Number",
+        "description": "Retrieve all passengers booked on a specific flight with automatic categorization by tier, special needs, age, and priority ordering.",
+        "operationId": "getPassengersByFlight",
+        "parameters": [
+          {
+            "name": "flight_no",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "AI6117"
+            },
+            "description": "Flight number to query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Passengers found and categorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "flight_no": {
+                      "type": "string"
+                    },
+                    "passengers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "categorized": {
+                      "type": "object",
+                      "properties": {
+                        "total_count": {
+                          "type": "integer"
+                        },
+                        "by_tier": {
+                          "type": "object",
+                          "properties": {
+                            "Platinum": {
+                              "type": "array"
+                            },
+                            "Gold": {
+                              "type": "array"
+                            },
+                            "Silver": {
+                              "type": "array"
+                            },
+                            "None": {
+                              "type": "array"
+                            }
+                          }
+                        },
+                        "special_needs": {
+                          "type": "array"
+                        },
+                        "elderly": {
+                          "type": "array"
+                        },
+                        "families": {
+                          "type": "array"
+                        },
+                        "wheelchair_required": {
+                          "type": "array"
+                        },
+                        "priority_order": {
+                          "type": "array",
+                          "description": "Passengers ordered by priority: Wheelchair > Platinum > Elderly > Gold > Special Needs > Silver > Standard"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No passengers found for this flight"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/passengers/search": {
+      "post": {
+        "summary": "Search Passengers",
+        "description": "Search passengers using structured filters with automatic categorization and priority ordering.",
+        "operationId": "searchPassengers",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "flight_no": {
+                    "type": "string",
+                    "description": "Flight number"
+                  },
+                  "pnr": {
+                    "type": "string",
+                    "description": "Passenger Name Record (booking reference)"
+                  },
+                  "loyalty_tier": {
+                    "type": "string",
+                    "enum": ["Platinum", "Gold", "Silver"],
+                    "description": "Loyalty tier"
+                  },
+                  "ticket_class": {
+                    "type": "string",
+                    "enum": ["Economy", "Business", "First"],
+                    "description": "Ticket class"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "Passenger email address"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "Passenger phone number"
+                  },
+                  "wheelchair_or_medical_time_required": {
+                    "type": "boolean",
+                    "description": "Filter passengers requiring wheelchair or medical assistance"
+                  },
+                  "min_age": {
+                    "type": "integer",
+                    "description": "Minimum age (use 65 for elderly passengers)"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Maximum results to return (default: 100)"
+                  }
+                }
+              },
+              "examples": {
+                "example1": {
+                  "summary": "Get all passengers on a specific flight",
+                  "value": {
+                    "flight_no": "AI6117"
+                  }
+                },
+                "example2": {
+                  "summary": "Get elderly passengers (65+) on a flight",
+                  "value": {
+                    "flight_no": "AI6117",
+                    "min_age": 65
+                  }
+                },
+                "example3": {
+                  "summary": "Get passengers requiring wheelchair assistance",
+                  "value": {
+                    "wheelchair_or_medical_time_required": true
+                  }
+                },
+                "example4": {
+                  "summary": "Get all Platinum tier passengers",
+                  "value": {
+                    "loyalty_tier": "Platinum"
+                  }
+                },
+                "example5": {
+                  "summary": "Get passengers by PNR (family booking)",
+                  "value": {
+                    "pnr": "SCOGN0"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Search results with categorization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "search_criteria": {
+                      "type": "object"
+                    },
+                    "result_count": {
+                      "type": "integer"
+                    },
+                    "passengers": {
+                      "type": "array"
+                    },
+                    "categorized": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/passengers/pnr/{pnr}": {
+      "get": {
+        "summary": "Get Passengers by PNR",
+        "description": "Retrieve all passengers with the same PNR (family or group booking).",
+        "operationId": "getPassengersByPnr",
+        "parameters": [
+          {
+            "name": "pnr",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "SCOGN0"
+            },
+            "description": "Passenger Name Record (booking reference)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Passengers with this PNR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "pnr": {
+                      "type": "string"
+                    },
+                    "passenger_count": {
+                      "type": "integer"
+                    },
+                    "passengers": {
+                      "type": "array"
+                    },
+                    "is_group_booking": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No passengers found with this PNR"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "API is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "database": {
+                      "type": "string"
+                    },
+                    "total_passengers": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
