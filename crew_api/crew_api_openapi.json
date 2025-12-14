@@ -51,13 +51,15 @@
                     "description": "Maximum duty hours in last 7 days (find crew under this limit)"
                   },
                   "available_after": {
-                    "type": ["string", "null"],
+                    "type": "string",
                     "format": "date-time",
+                    "nullable": true,
                     "description": "Find crew available after this time (ISO 8601, optional)"
                   },
                   "available_before": {
-                    "type": ["string", "null"],
+                    "type": "string",
                     "format": "date-time",
+                    "nullable": true,
                     "description": "Find crew available before this time (optional)"
                   },
                   "limit": {
@@ -195,8 +197,9 @@
                     "description": "Required crew role"
                   },
                   "available_after": {
-                    "type": ["string", "null"],
+                    "type": "string",
                     "format": "date-time",
+                    "nullable": true,
                     "description": "Must be available after this time (optional, can be null or omitted)"
                   },
                   "max_duty_hours": {
@@ -269,13 +272,15 @@
                     "description": "Assignment status"
                   },
                   "flight_date_after": {
-                    "type": ["string", "null"],
+                    "type": "string",
                     "format": "date-time",
+                    "nullable": true,
                     "description": "Assignments after this date (optional)"
                   },
                   "flight_date_before": {
-                    "type": ["string", "null"],
+                    "type": "string",
                     "format": "date-time",
+                    "nullable": true,
                     "description": "Assignments before this date (optional)"
                   },
                   "origin": {
