@@ -1,0 +1,331 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Crew Management API",
+    "description": "API for managing crew members and assignments. Designed for watsonx Orchestrate agents to handle crew availability, assignments, and disruption management.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5002",
+      "description": "Local Development Server (update to Render URL after deployment)"
+    }
+  ],
+  "paths": {
+    "/crew/search": {
+      "post": {
+        "summary": "Search Crew Members",
+        "description": "Search for crew members using filters like role, certifications, location, status, duty hours, and availability.",
+        "operationId": "searchCrew",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "enum": ["Pilot", "Co-Pilot", "Cabin Crew"],
+                    "description": "Crew role"
+                  },
+                  "certifications": {
+                    "type": "string",
+                    "description": "Aircraft type certification (e.g., A320, B737, B787)"
+                  },
+                  "base_airport": {
+                    "type": "string",
+                    "description": "Home base airport code (e.g., DEL, BOM, LHR)"
+                  },
+                  "current_location": {
+                    "type": "string",
+                    "description": "Current location airport code"
+                  },
+                  "current_status": {
+                    "type": "string",
+                    "enum": ["AVAILABLE", "STANDBY_AIRPORT", "STANDBY_HOME", "RESTING", "UNAVAILABLE"],
+                    "description": "Current crew status"
+                  },
+                  "max_duty_hours": {
+                    "type": "number",
+                    "description": "Maximum duty hours in last 7 days (find crew under this limit)"
+                  },
+                  "available_after": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Find crew available after this time (ISO 8601)"
+                  },
+                  "available_before": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Find crew available before this time"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Maximum results to return (default: 50)"
+                  }
+                }
+              },
+              "examples": {
+                "example1": {
+                  "summary": "Find available pilots with A320 certification",
+                  "value": {
+                    "role": "Pilot",
+                    "certifications": "A320",
+                    "current_status": "AVAILABLE"
+                  }
+                },
+                "example2": {
+                  "summary": "Find cabin crew at Delhi airport",
+                  "value": {
+                    "role": "Cabin Crew",
+                    "current_location": "DEL"
+                  }
+                },
+                "example3": {
+                  "summary": "Find crew with low duty hours",
+                  "value": {
+                    "max_duty_hours": 30
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Crew search results with categorization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "search_criteria": {
+                      "type": "object"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "crew": {
+                      "type": "array"
+                    },
+                    "categorized": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crew/{crew_id}": {
+      "get": {
+        "summary": "Get Crew Member Details",
+        "description": "Get complete details for a specific crew member including all their assignments.",
+        "operationId": "getCrewDetails",
+        "parameters": [
+          {
+            "name": "crew_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "C00123"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Crew details with assignments"
+          },
+          "404": {
+            "description": "Crew member not found"
+          }
+        }
+      }
+    },
+    "/crew/flight/{flight_no}": {
+      "get": {
+        "summary": "Get Crew for Flight",
+        "description": "Get all crew members assigned to a specific flight with role breakdown.",
+        "operationId": "getCrewByFlight",
+        "parameters": [
+          {
+            "name": "flight_no",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "AI203"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Crew assignments for flight"
+          }
+        }
+      }
+    },
+    "/crew/available": {
+      "post": {
+        "summary": "Find Available Crew for Disruptions",
+        "description": "Specialized endpoint to find available replacement crew for flight disruptions. Filters by certifications, location, role, availability time, and duty hours compliance.",
+        "operationId": "findAvailableCrew",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "certifications_required": {
+                    "type": "string",
+                    "description": "Required aircraft certification (e.g., A320, B787)"
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "Airport code where crew is needed"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["Pilot", "Co-Pilot", "Cabin Crew"],
+                    "description": "Required crew role"
+                  },
+                  "available_after": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Must be available after this time"
+                  },
+                  "max_duty_hours": {
+                    "type": "number",
+                    "description": "Maximum duty hours limit (default: 50)",
+                    "default": 50
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Max results (default: 20)",
+                    "default": 20
+                  }
+                }
+              },
+              "examples": {
+                "example1": {
+                  "summary": "Find replacement pilot for cancelled A320 flight at Delhi",
+                  "value": {
+                    "certifications_required": "A320",
+                    "location": "DEL",
+                    "role": "Pilot",
+                    "max_duty_hours": 45
+                  }
+                },
+                "example2": {
+                  "summary": "Find cabin crew at Mumbai for urgent replacement",
+                  "value": {
+                    "role": "Cabin Crew",
+                    "location": "BOM"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Available crew with categorization by immediate availability"
+          }
+        }
+      }
+    },
+    "/assignments/search": {
+      "post": {
+        "summary": "Search Crew Assignments",
+        "description": "Search crew assignments by crew ID, flight number, role, status, date range, route.",
+        "operationId": "searchAssignments",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "crew_id": {
+                    "type": "string",
+                    "description": "Specific crew member ID"
+                  },
+                  "flight_no": {
+                    "type": "string",
+                    "description": "Specific flight number"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["Pilot", "Co-Pilot", "Cabin Crew"]
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["SCHEDULED", "COMPLETED", "CANCELLED"],
+                    "description": "Assignment status"
+                  },
+                  "flight_date_after": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Assignments after this date"
+                  },
+                  "flight_date_before": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Assignments before this date"
+                  },
+                  "origin": {
+                    "type": "string",
+                    "description": "Origin airport code"
+                  },
+                  "destination": {
+                    "type": "string",
+                    "description": "Destination airport code"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Max results (default: 100)"
+                  }
+                }
+              },
+              "examples": {
+                "example1": {
+                  "summary": "Get all assignments for a crew member",
+                  "value": {
+                    "crew_id": "C00123"
+                  }
+                },
+                "example2": {
+                  "summary": "Find cancelled assignments",
+                  "value": {
+                    "status": "CANCELLED"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assignment search results"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "API is healthy"
+          }
+        }
+      }
+    }
+  }
+}
