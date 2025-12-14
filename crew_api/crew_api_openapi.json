@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5002",
+      "url": "https://crew-api-cuij.onrender.com",
       "description": "Local Development Server (update to Render URL after deployment)"
     }
   ],
@@ -51,14 +51,14 @@
                     "description": "Maximum duty hours in last 7 days (find crew under this limit)"
                   },
                   "available_after": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "format": "date-time",
-                    "description": "Find crew available after this time (ISO 8601)"
+                    "description": "Find crew available after this time (ISO 8601, optional)"
                   },
                   "available_before": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "format": "date-time",
-                    "description": "Find crew available before this time"
+                    "description": "Find crew available before this time (optional)"
                   },
                   "limit": {
                     "type": "integer",
@@ -195,9 +195,9 @@
                     "description": "Required crew role"
                   },
                   "available_after": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "format": "date-time",
-                    "description": "Must be available after this time"
+                    "description": "Must be available after this time (optional, can be null or omitted)"
                   },
                   "max_duty_hours": {
                     "type": "number",
@@ -269,14 +269,14 @@
                     "description": "Assignment status"
                   },
                   "flight_date_after": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "format": "date-time",
-                    "description": "Assignments after this date"
+                    "description": "Assignments after this date (optional)"
                   },
                   "flight_date_before": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "format": "date-time",
-                    "description": "Assignments before this date"
+                    "description": "Assignments before this date (optional)"
                   },
                   "origin": {
                     "type": "string",
