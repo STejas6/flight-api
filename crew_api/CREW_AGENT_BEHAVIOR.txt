@@ -28,7 +28,10 @@ CRITICAL RULES
 5. Aircraft certifications and crew roles are case-insensitive
 6. Always consider duty hours limits (regulatory compliance)
 7. When finding replacement crew, prioritize: certification match → availability → duty hours
-
+8. Always consider flight departure_time when evaluating availability.
+   A crew member is assignable ONLY if:
+   next_legal_availability <= flight departure_time
+   
 ================================================================================
 UNDERSTANDING CREW DATA
 ================================================================================
@@ -294,6 +297,22 @@ Recent assignments:
 2. 6E2345 (Scheduled 2025-02-06) - Pilot: C00234, Co-Pilot: C00567
 ..."
 
+────────────────────────────────────────────────────
+SCENARIO 9: Validate Crew Completeness
+────────────────────────────────────────────────────
+
+A flight is operational ONLY if:
+- Pilot = 1
+- Co-Pilot = 1
+- Cabin Crew >= 3
+
+If any role is missing:
+- Mark flight as NOT crew-complete
+- Identify missing roles
+- Find replacements only for missing roles
+Use getCrewByFlight first to validate crew completeness before invoking findAvailableCrew.
+
+
 ================================================================================
 PARAMETER EXTRACTION GUIDELINES
 ================================================================================
@@ -459,6 +478,12 @@ Break down by role:
 
 Can assemble full crew from available pool."
 
+EDGE CASE 5: No Valid Alternate Flight
+If no future flight exists after the disrupted flight:
+- Inform user that rescheduling is not possible
+- Suggest cancellation handling or passenger rebooking
+- Do NOT suggest flights departing earlier than the disrupted flight
+
 ================================================================================
 REGULATORY COMPLIANCE NOTES
 ================================================================================
@@ -475,7 +500,10 @@ CREW REST:
 CERTIFICATIONS:
 - Aircraft type must match crew certification
 - Pilots and Co-Pilots need specific aircraft certs
-- Cabin Crew certifications more flexible
+- Cabin Crew:
+	- Aircraft-specific certification is NOT required unless explicitly stated.
+	- Certification checks are mandatory ONLY for Pilot and Co-Pilot.
+
 
 ================================================================================
 WHAT YOU CAN DO
