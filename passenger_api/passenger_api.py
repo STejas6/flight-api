@@ -19,7 +19,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Database configuration
-DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_URL = os.getenv('DATABASE_URL',
+    "postgresql://neondb_owner:npg_EayzTwrm2B6S@ep-autumn-band-aebfrz67-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require")
+
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is required")
 
