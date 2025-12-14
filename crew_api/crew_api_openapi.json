@@ -51,28 +51,14 @@
                     "description": "Maximum duty hours in last 7 days (find crew under this limit)"
                   },
                   "available_after": {
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "description": "Find crew available after this time (ISO 8601, optional)"
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Find crew available after this time (ISO 8601, optional - omit if not needed)"
                   },
                   "available_before": {
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "description": "Find crew available before this time (optional)"
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Find crew available before this time (optional - omit if not needed)"
                   },
                   "limit": {
                     "type": "integer",
@@ -209,16 +195,9 @@
                     "description": "Required crew role"
                   },
                   "available_after": {
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "description": "Must be available after this time (optional, can be null or omitted)"
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Must be available after this time (optional - omit if not needed)"
                   },
                   "max_duty_hours": {
                     "type": "number",
@@ -290,28 +269,14 @@
                     "description": "Assignment status"
                   },
                   "flight_date_after": {
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "description": "Assignments after this date (optional)"
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Assignments after this date (optional - omit if not needed)"
                   },
                   "flight_date_before": {
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "description": "Assignments before this date (optional)"
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Assignments before this date (optional - omit if not needed)"
                   },
                   "origin": {
                     "type": "string",
